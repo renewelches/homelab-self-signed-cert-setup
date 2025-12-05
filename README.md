@@ -145,7 +145,7 @@ L = New York
 O = home lab #Organization name (company/entity).
 OU = Proxmox    #Organizational Unit (department/divisio
 #Common Name - the most important field. This should match the hostname or domain name that clients will use to connect. Here it's pve.local for a Proxmox Virtual Environment server. Must be less than 64 Char.
-CN = *.proxmox.homelab.home, 192.168.1.10 
+CN = proxmox.homelab.home, 192.168.1.10 
 
 #X.509 v3 extensions that define how the certificate can be used
 [v3_req]
@@ -155,7 +155,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = *.proxmox.homelab.home
+DNS.1 = proxmox.homelab.home
 IP.1 = 192.168.1.10
 ```
 
