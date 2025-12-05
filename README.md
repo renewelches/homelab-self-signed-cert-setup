@@ -18,7 +18,7 @@ This command generates a 2048-bit RSA private key and saves it to a file called 
 - **`-aes256`**: Encrypts the private key using AES-256 encryption. When you run this command, you'll be prompted to enter a passphrase, which will be used to encrypt the key file. This means anyone who wants to use this key will need to enter the passphrase first, adding a layer of security. Without this flag, the key would be stored unencrypted and readable as plain text.
 - **`-out homelab-ca-private_key.pem`**: Specifies the output filename where the encrypted key will be saved. The .pem extension stands for Privacy Enhanced Mail, which is a standard format for storing cryptographic keys.
 - **`2048`**: The key size in bits. 2048 bits is the current standard for RSA keys and provides adequate security for most purposes. Larger key sizes (like 4096) offer more security but take longer to generate and use. Since this is for a homelab we are totally fine with 2048.
-When you run this command, OpenSSL will ask you to enter and confirm a passphrase. 
+When you run this command, OpenSSL will ask you to enter and confirm a passphrase.
 
 Keep this passphrase secure—you'll need it whenever you want to use this private key.
 
@@ -57,23 +57,55 @@ Sets the certificate's subject Distinguished Name (DN) directly on the command l
 
 **The result:** You get `homelab-root-CA.crt`, a root CA certificate valid for 10 years that you can use to sign other certificates for local development or your homelab.
 
-## Install the Root CA into Your System's Trust Store 
+## Install the Root CA into Your System's Trust Store
 
-This step is essential so your browser and OS trust certificates signed by this CA.
+## macOS
 
-- Windows: Use the Microsoft Management Console (MMC) to import the .crt file into the "Trusted Root Certification Authorities" store (see Microsoft Learn for detailed steps).
-- macOS: Double-click the .crt file and use the Keychain Access app to set it to "Always Trust".
-- Linux: Copy the .crt file to the system's CA directory and update the certificate store:
+**Locate your certificate file** (e.g., `homelab-root-CA.crt` or `root-CA.pem`)
+
+**Open a Terminal** and enter 
 
 ```bash
-sudo cp myCA.crt /usr/local/share/ca-certificates/myCA.crt
-sudo update-ca-certificates
-Use code with caution.
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain homelab-root-CA.crt
 ```
- 
-After these steps, you can generate specific server certificates for your local domains and sign them using your new root CA's private key. 
 
+Directly importing the certificate via Kechain Access did fail with an error `Error: -25294`.
 
+**Verfy it is imported** open the `Keychain Access` app and select `iCloud` or any other previosly selected key chain and search for the name of your certificate (in my case `Home Lab CA`).
+
+## Linux
+
+The process varies by distribution, but here are the most common approaches:
+
+### Debian/Ubuntu
+
+1. **Copy the certificate** to the trusted CA directory:
+
+   ```bash
+   sudo cp homelab-root-CA.crt /usr/local/share/ca-certificates/
+   ```
+
+2. **Update the CA store:**
+
+   ```bash
+   sudo update-ca-certificates
+   ```
+
+3. **Verify** it was added by checking:
+
+   ```bash
+   ls /etc/ssl/certs/ | grep root-ca
+   ```
+
+   ```
+
+### General Verification
+
+To verify the certificate is trusted by your system:
+
+```bash
+openssl verify -CAfile /etc/ssl/certs/ca-bundle.crt homelab-root-CA.crt
+```
 
 # generate self-signed certificate for 10 years
 
