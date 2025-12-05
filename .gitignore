@@ -2,3 +2,7 @@
 .DS_Store
 homelab-root-CA.crt
 homelab-ca-private_key.pem
+homelab-root-CA.srl
+proxmox.cnf
+proxmox.crt
+proxmox.csr
