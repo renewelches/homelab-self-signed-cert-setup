@@ -14,6 +14,8 @@ openssl genrsa -aes256 -out homelab-ca-private_key.pem 2048
 
 This command generates a 2048-bit RSA private key and saves it to a file called `homelab-ca-private_key.pem`.
 
+### Basic Command Structure openssl genrsa   
+
 - **`openssl genrsa`**: The OpenSSL command for generating RSA private keys.
 - **`-aes256`**: Encrypts the private key using AES-256 encryption. When you run this command, you'll be prompted to enter a passphrase, which will be used to encrypt the key file. This means anyone who wants to use this key will need to enter the passphrase first, adding a layer of security. Without this flag, the key would be stored unencrypted and readable as plain text.
 - **`-out homelab-ca-private_key.pem`**: Specifies the output filename where the encrypted key will be saved. The .pem extension stands for Privacy Enhanced Mail, which is a standard format for storing cryptographic keys.
@@ -27,6 +29,8 @@ Keep this passphrase secure—you'll need it whenever you want to use this priva
 ```bash
 openssl req -x509 -new -nodes -key homelab-ca-private_key.pem  -sha256 -days 3650 -out homelab-root-CA.crt -subj "/CN=Home Lab CA"
 ```
+
+### Basic Command Structure openssl req
 
 **`openssl req`**
 The `req` subcommand handles certificate signing requests (CSRs) and certificate generation.
@@ -97,8 +101,6 @@ The process varies by distribution, but here are the most common approaches:
    ls /etc/ssl/certs/ | grep root-ca
    ```
 
-   ```
-
 #### General Verification
 
 To verify the certificate is trusted by your system:
@@ -160,7 +162,7 @@ IP.1 = 192.168.1.10
 ```
 
 ## 3. Generate the Certificate Signing Request (CSR)
-    
+
 With the previously created key and cnf file.
 
 ```bash
@@ -179,9 +181,10 @@ On the machine where the root CA is located and where you just copied the csr/cn
 openssl x509 -req -in proxmox.csr -CA homelab-root-CA.crt -CAkey homelab-ca-private_key.pem -CAcreateserial -out proxmox.crt -days 365 -sha256 -extfile proxmox.cnf -extensions v3_req
 
 ```
+
 This OpenSSL command **signs a certificate signing request (CSR) using your Root CA** to create a server certificate. Here's what each part does:
 
-**Basic Command Structure**
+### Basic Command Structure openssl x509
 
 **`openssl x509`**
 The X.509 certificate utility for displaying and signing certificates.
@@ -231,3 +234,13 @@ In particular the SAN entries.
 ```bash
 openssl x509 -in proxmox.crt -text -noout | grep "Subject Alternative Name" -A 1
 ```
+## Setup TLS on Proxmox
+
+ [Upload self signed certificates via the webui](https://pve.proxmox.com/wiki/Certificate_Management#sysadmin_certs_upload_custom).
+
+## Setup TLS on Homeassistant with self signed certifiate
+
+This community link describes the setup of TLS on Homeassistant with a self signed certificate.
+
+[Certificate Authority and Self-signed Certificate for SSL/TLS](https://community.home-assistant.io/t/certificate-authority-and-self-signed-certificate-for-ssl-tls/196970)
+
