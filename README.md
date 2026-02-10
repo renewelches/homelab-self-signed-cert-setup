@@ -14,13 +14,13 @@ openssl genrsa -aes256 -out homelab-ca-private_key.pem 2048
 
 This command generates a 2048-bit RSA private key and saves it to a file called `homelab-ca-private_key.pem`.
 
-### Basic Command Structure openssl genrsa   
+### Basic Command Structure openssl genrsa
 
 - **`openssl genrsa`**: The OpenSSL command for generating RSA private keys.
 - **`-aes256`**: Encrypts the private key using AES-256 encryption. When you run this command, you'll be prompted to enter a passphrase, which will be used to encrypt the key file. This means anyone who wants to use this key will need to enter the passphrase first, adding a layer of security. Without this flag, the key would be stored unencrypted and readable as plain text.
 - **`-out homelab-ca-private_key.pem`**: Specifies the output filename where the encrypted key will be saved. The .pem extension stands for Privacy Enhanced Mail, which is a standard format for storing cryptographic keys.
 - **`2048`**: The key size in bits. 2048 bits is the current standard for RSA keys and provides adequate security for most purposes. Larger key sizes (like 4096) offer more security but take longer to generate and use. Since this is for a homelab we are totally fine with 2048.
-When you run this command, OpenSSL will ask you to enter and confirm a passphrase.
+  When you run this command, OpenSSL will ask you to enter and confirm a passphrase.
 
 Keep this passphrase secure—you'll need it whenever you want to use this private key.
 
@@ -67,7 +67,7 @@ Sets the certificate's subject Distinguished Name (DN) directly on the command l
 
 **Locate your certificate file** (e.g., `homelab-root-CA.crt` or `root-CA.pem`)
 
-**Open a Terminal** and enter 
+**Open a Terminal** and enter
 
 ```bash
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain homelab-root-CA.crt
@@ -92,7 +92,7 @@ The process varies by distribution, but here are the most common approaches:
 2. **Update the CA store:**
 
    ```bash
-   sudo update-ca-certificates
+   sudo update-ca-certificates --fresh
    ```
 
 3. **Verify** it was added by checking:
@@ -133,8 +133,8 @@ Create the file `proxmox.cnf` and add the following content:
 # RSA key size to 2048 bits
 default_bits = 2048
 # Disables interactive prompts. OpenSSL will use values from the config file instead of asking you to enter them manually.
-prompt = no 
-#Specifies SHA-256 as the default message digest (hashing algorithm) for signing operations. 
+prompt = no
+#Specifies SHA-256 as the default message digest (hashing algorithm) for signing operations.
 default_md = sha256
 #points to the section [distinguished_name] below that contains the subject information for the certificate.
 distinguished_name = distinguished_name
@@ -147,13 +147,13 @@ L = New York
 O = home lab #Organization name (company/entity).
 OU = Proxmox    #Organizational Unit (department/divisio
 #Common Name - the most important field. This should match the hostname or domain name that clients will use to connect. Here it's pve.local for a Proxmox Virtual Environment server. Must be less than 64 Char.
-CN = proxmox.homelab.home, 192.168.1.10 
+CN = proxmox.homelab.home, 192.168.1.10
 
 #X.509 v3 extensions that define how the certificate can be used
 [v3_req]
 keyUsage = critical, digitalSignature, keyEncipherment
 #Specifies the certificate is intended for server authentication (TLS/SSL servers). This is required for HTTPS servers.
-extendedKeyUsage = serverAuth 
+extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
@@ -234,13 +234,13 @@ In particular the SAN entries.
 ```bash
 openssl x509 -in proxmox.crt -text -noout | grep "Subject Alternative Name" -A 1
 ```
+
 ## Setup TLS on Proxmox
 
- [Upload self signed certificates via the webui](https://pve.proxmox.com/wiki/Certificate_Management#sysadmin_certs_upload_custom).
+[Upload self signed certificates via the webui](https://pve.proxmox.com/wiki/Certificate_Management#sysadmin_certs_upload_custom).
 
 ## Setup TLS on Homeassistant with self signed certifiate
 
 This community link describes the setup of TLS on Homeassistant with a self signed certificate.
 
 [Certificate Authority and Self-signed Certificate for SSL/TLS](https://community.home-assistant.io/t/certificate-authority-and-self-signed-certificate-for-ssl-tls/196970)
-
