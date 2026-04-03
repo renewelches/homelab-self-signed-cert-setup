@@ -109,9 +109,10 @@ To verify the certificate is trusted by your system:
 openssl verify -CAfile /etc/ssl/certs/ca-bundle.crt homelab-root-CA.crt
 ```
 
-## Generate a Server Certificate
+## Generate a Server Certificate (Manually)
 
 As an example we are going to create a server certificate for proxmox.
+For a fully script based approache see [Using the Certificate Generator Script](#using-the-certificate-generator-script)
 
 ### 1. Generate a private key on the server
 
@@ -256,17 +257,17 @@ cd certificates
 
 The script will prompt you for:
 
-| Prompt | Example | Notes |
-|---|---|---|
-| Service name | `forgejo` | Used for the output directory and file names |
-| Primary domain | `forgejo.homelab.home` | Becomes `CN` and `DNS.1` in the cert |
-| Additional DNS names | `git.homelab.home` | Optional, repeat until blank |
-| IP addresses | `192.168.1.20` | Optional, repeat until blank |
-| Organisational Unit (OU) | `Forgejo` | Defaults to the capitalised service name |
-| Country (C) | `US` | Defaults to `US` |
-| State (ST) | `New York` | Defaults to `New York` |
-| City (L) | `New York` | Defaults to `New York` |
-| Validity in days | `398` | Defaults to 398 (Chrome's maximum) |
+| Prompt                   | Example                | Notes                                        |
+| ------------------------ | ---------------------- | -------------------------------------------- |
+| Service name             | `forgejo`              | Used for the output directory and file names |
+| Primary domain           | `forgejo.homelab.home` | Becomes `CN` and `DNS.1` in the cert         |
+| Additional DNS names     | `git.homelab.home`     | Optional, repeat until blank                 |
+| IP addresses             | `192.168.1.20`         | Optional, repeat until blank                 |
+| Organisational Unit (OU) | `Forgejo`              | Defaults to the capitalised service name     |
+| Country (C)              | `US`                   | Defaults to `US`                             |
+| State (ST)               | `New York`             | Defaults to `New York`                       |
+| City (L)                 | `New York`             | Defaults to `New York`                       |
+| Validity in days         | `398`                  | Defaults to 398 (Chrome's maximum)           |
 
 ### Output
 
