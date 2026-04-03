@@ -235,6 +235,59 @@ In particular the SAN entries.
 openssl x509 -in proxmox.crt -text -noout | grep "Subject Alternative Name" -A 1
 ```
 
+## Using the Certificate Generator Script
+
+The `certificates/new-cert.sh` script automates the entire server certificate workflow (steps 1–5 above) into a single interactive command.
+
+### Prerequisites
+
+The script expects your CA files to already exist in the `certificates/` directory:
+
+- `homelab-root-CA.crt`
+- `homelab-ca-private_key.pem`
+- `homelab-root-CA.srl`
+
+### Usage
+
+```bash
+cd certificates
+./new-cert.sh
+```
+
+The script will prompt you for:
+
+| Prompt | Example | Notes |
+|---|---|---|
+| Service name | `forgejo` | Used for the output directory and file names |
+| Primary domain | `forgejo.homelab.home` | Becomes `CN` and `DNS.1` in the cert |
+| Additional DNS names | `git.homelab.home` | Optional, repeat until blank |
+| IP addresses | `192.168.1.20` | Optional, repeat until blank |
+| Organisational Unit (OU) | `Forgejo` | Defaults to the capitalised service name |
+| Country (C) | `US` | Defaults to `US` |
+| State (ST) | `New York` | Defaults to `New York` |
+| City (L) | `New York` | Defaults to `New York` |
+| Validity in days | `398` | Defaults to 398 (Chrome's maximum) |
+
+### Output
+
+All files are written to `certificates/<service-name>/`:
+
+```
+certificates/forgejo/
+├── forgejo.cnf   # OpenSSL config with SANs
+├── forgejo.key   # Private key (keep on the server)
+├── forgejo.csr   # Certificate signing request
+└── forgejo.crt   # Signed certificate (install on the server)
+```
+
+You will be prompted for your CA key passphrase once, during the signing step.
+
+### Verify the result
+
+```bash
+openssl x509 -in certificates/forgejo/forgejo.crt -noout -text | grep -A2 "Subject Alternative"
+```
+
 ## Setup TLS on Proxmox
 
 [Upload self signed certificates via the webui](https://pve.proxmox.com/wiki/Certificate_Management#sysadmin_certs_upload_custom).
