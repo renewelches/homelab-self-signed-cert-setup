@@ -95,8 +95,11 @@ OU = $OU
 CN = $PRIMARY_DOMAIN
 
 [v3_req]
+basicConstraints = critical, CA:FALSE
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
 subjectAltName = @alt_names
 
 [alt_names]

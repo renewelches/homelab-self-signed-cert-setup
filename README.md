@@ -26,9 +26,31 @@ Keep this passphrase secure—you'll need it whenever you want to use this priva
 
 ## Create a self-signed root Certificate Authority(CA) certificate
 
-```bash
-openssl req -x509 -new -nodes -key homelab-ca-private_key.pem  -sha256 -days 3650 -out homelab-root-CA.crt -subj "/CN=Home Lab CA"
+First create a config file `homelab-ca.cnf` that sets the CA extensions explicitly:
+
+```ini
+[req]
+prompt = no
+default_md = sha256
+distinguished_name = distinguished_name
+x509_extensions = v3_ca
+
+[distinguished_name]
+CN = Home Lab CA
+
+[v3_ca]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
 ```
+
+Then create the certificate:
+
+```bash
+openssl req -x509 -new -key homelab-ca-private_key.pem -sha256 -days 3650 -out homelab-root-CA.crt -config homelab-ca.cnf
+```
+
+> **Updated October 5, 2026:** An earlier version of this README used a one-liner with `-subj "/CN=Home Lab CA"` and no config file. That produces a CA without the `keyUsage` extension, which Python 3.13+ rejects (`CA cert does not include key usage extension`), because `ssl.create_default_context()` now enables `VERIFY_X509_STRICT`. If you created your CA that way, re-run the command above with the **same private key** and re-trust the new `homelab-root-CA.crt` on your machines. Certificates you already signed keep working as long as they contain an Authority Key Identifier (see the `[v3_req]` section below).
 
 ### Basic Command Structure openssl req
 
@@ -40,9 +62,6 @@ Outputs a self-signed certificate instead of a certificate signing request. This
 
 **`-new`**
 Generates a new certificate request. Combined with `-x509`, it creates a new certificate directly.
-
-**`-nodes`**
-"No DES" - stores the private key without encryption. The certificate won't be password-protected. Useful for automated processes nd homelab setups but less secure if the file is compromised.
 
 **`-key homelab-ca-private_key.pem`**
 Specifies the private key file to use. This is the key we created in the previous step with the `openssl genrsa` command.
@@ -56,8 +75,8 @@ Sets the certificate validity period to 3650 days (10 years). After this, the ce
 **`-out homelab-root-CA.crt`**
 Specifies the output file for the generated certificate.
 
-**`-subj "/CN=Home Lab CA"`**
-Sets the certificate's subject Distinguished Name (DN) directly on the command line, bypassing interactive prompts. `CN` is the Common Name - the human-readable name for this CA.
+**`-config homelab-ca.cnf`**
+Reads the subject name and the X.509 v3 extensions from the config file. `CN` in `[distinguished_name]` is the Common Name - the human-readable name for this CA. The `[v3_ca]` section marks the certificate as a CA (`basicConstraints`) and states that its key may sign certificates and CRLs (`keyUsage`). Strict validators such as Python 3.13+ require both.
 
 **The result:** You get `homelab-root-CA.crt`, a root CA certificate valid for 10 years that you can use to sign other certificates for local development or your homelab.
 
@@ -152,9 +171,14 @@ CN = proxmox.homelab.home, 192.168.1.10
 
 #X.509 v3 extensions that define how the certificate can be used
 [v3_req]
+#This is a server certificate, not a CA.
+basicConstraints = critical, CA:FALSE
 keyUsage = critical, digitalSignature, keyEncipherment
 #Specifies the certificate is intended for server authentication (TLS/SSL servers). This is required for HTTPS servers.
 extendedKeyUsage = serverAuth
+#Key identifiers. Python 3.13+ rejects server certificates without an Authority Key Identifier, and newer OpenSSL versions no longer add it by default.
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
 subjectAltName = @alt_names
 
 [alt_names]
